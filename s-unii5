@@ -1,0 +1,12 @@
+# Configure the port
+stty -F /dev/ttyS5 19200 raw -echo -crtscts cs8 -parenb -cstopb
+
+# Send test data
+echo "Test123" > /dev/ttyS5
+
+# Read for 2 seconds using background process and kill
+cat /dev/ttyS5 > /tmp/uart_output &
+CAT_PID=$!
+sleep 2
+kill $CAT_PID 2>/dev/null
+cat /tmp/uart_output

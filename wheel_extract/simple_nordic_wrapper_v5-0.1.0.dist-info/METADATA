@@ -1,0 +1,5 @@
+Metadata-Version: 2.1
+Name: simple-nordic-wrapper-v5
+Version: 0.1.0
+Summary: Simple Python wrapper for Nordic BLE driver v5 with real dongle communication
+

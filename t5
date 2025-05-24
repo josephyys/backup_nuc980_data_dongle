@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# UART port to monitor
+PORT=${1:-"/dev/ttyS5"}
+BAUD=${2:-19200}
+
+# Check if port exists
+if [ ! -e "$PORT" ]; then
+    echo "Error: Port $PORT does not exist"
+    exit 1
+fi
+
+echo "Monitoring binary data on $PORT at $BAUD baud..."
+echo "Press Ctrl+C to stop"
+
+# Configure the port
+stty -F "$PORT" $BAUD raw -echo -crtscts
+stty -F "$PORT" -ignbrk -ixon -ixoff -ixany
+stty -F "$PORT" -icanon -isig -iexten
+stty -F "$PORT" -opost
+stty -F "$PORT" cs8 -parenb -cstopb -hupcl
+stty -F "$PORT" min 0 time 5
+
+# Create a temp file to store data
+TEMP_FILE=$(mktemp)
+trap "rm -f $TEMP_FILE; exit" INT TERM EXIT
+
+# Initialize counters
+TOTAL_BYTES=0
+LAST_TOTAL=0
+INTERVAL_START=$(date +%s)
+
+echo "=== Data Statistics ==="
+echo "Time       | Bytes (Interval) | Bytes (Total)"
+echo "-----------+-----------------+---------------"
+
+while true; do
+    # Read data in chunks with timeout
+    dd if="$PORT" of="$TEMP_FILE" bs=1024 count=1 2>/dev/null
+    
+    # Get byte count from this read
+    BYTES_READ=$(wc -c < "$TEMP_FILE")
+    TOTAL_BYTES=$((TOTAL_BYTES + BYTES_READ))
+    
+    # Display statistics every second
+    CURRENT_TIME=$(date +%s)
+    if [ $((CURRENT_TIME - INTERVAL_START)) -ge 1 ]; then
+        INTERVAL_BYTES=$((TOTAL_BYTES - LAST_TOTAL))
+        timestamp=$(date "+%H:%M:%S")
+        printf "%s | %15d | %15d\n" "$timestamp" "$INTERVAL_BYTES" "$TOTAL_BYTES"
+        
+        LAST_TOTAL=$TOTAL_BYTES
+        INTERVAL_START=$CURRENT_TIME
+    fi
+    
+    # Small sleep to prevent CPU thrashing
+    sleep 0.1
+done

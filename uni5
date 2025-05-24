@@ -1,0 +1,59 @@
+ ./uni5
+Starting binary loopback test on /dev/ttyS5 at 19200 baud...
+Test will run for 10 seconds
+IMPORTANT: TX and RX pins must be physically connected!
+Flushed input buffer
+Created test pattern: c8cb263f1d1bfe88... (32 bytes)
+Sending test pattern...
+Reader process started
+TX: 32 bytes sent
+TX: 64 bytes sent
+TX: 96 bytes sent
+TX: 128 bytes sent
+TX: 160 bytes sent
+TX: 192 bytes sent
+TX: 224 bytes sent
+TX: 256 bytes sent
+TX: 288 bytes sent
+TX: 320 bytes sent
+TX: 352 bytes sent
+TX: 384 bytes sent
+TX: 416 bytes sent
+TX: 448 bytes sent
+TX: 480 bytes sent
+TX: 512 bytes sent
+TX: 544 bytes sent
+TX: 576 bytes sent
+TX: 608 bytes sent
+TX: 640 bytes sent
+TX: 672 bytes sent
+TX: 704 bytes sent
+TX: 736 bytes sent
+TX: 768 bytes sent
+TX: 800 bytes sent
+TX: 832 bytes sent
+TX: 864 bytes sent
+TX: 896 bytes sent
+TX: 928 bytes sent
+TX: 960 bytes sent
+TX: 992 bytes sent
+TX: 1024 bytes sent
+TX: 1056 bytes sent
+TX: 1088 bytes sent
+TX: 1120 bytes sent
+TX: 1152 bytes sent
+Waiting for reader to complete...
+Reader process complete
+=== Test Complete ===
+Total bytes sent:     1152
+Total bytes received: 0
+Read attempts:        0
+Loopback efficiency:  0%
+RESULT: FAILED (no data received)
+
+Troubleshooting suggestions:
+1. Verify TX and RX pins are physically connected
+2. Check if port is in use by another program
+3. Try a different baud rate
+4. Verify port permissions
+

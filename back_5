@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# UART port to monitor
+PORT=${1:-"/dev/ttyS5"}
+BAUD=${2:-19200}
+STATUS_FILE="/tmp/uart_status"
+
+# Initialize status file
+echo "0" > $STATUS_FILE
+echo "UART monitor started for $PORT at $(date)" > /tmp/uart_log
+
+# Configure UART
+stty -F "$PORT" $BAUD raw -echo -crtscts cs8 -parenb -cstopb min 0 time 1
+
+# Start background monitor process
+(
+    bytes_total=0
+    last_update=$(date +%s)
+    
+    while true; do
+        # Try to read a single byte with very short timeout
+        byte=$(dd if="$PORT" bs=1 count=1 2>/dev/null)
+        
+        # Check if byte was read
+        if [ -n "$byte" ]; then
+            bytes_total=$((bytes_total + 1))
+            echo "$bytes_total" > "$STATUS_FILE"
+            echo "Received byte at $(date +%H:%M:%S.%N)" >> /tmp/uart_log
+        fi
+        
+        # Update status file every second even if no data
+        now=$(date +%s)
+        if [ $((now - last_update)) -ge 1 ]; then
+            echo "$bytes_total" > "$STATUS_FILE"
+            last_update=$now
+        fi
+        
+        # Brief sleep to prevent CPU thrashing
+        sleep 0.1
+    done
+) &
+
+# Save PID for later cleanup
+MONITOR_PID=$!
+echo "$MONITOR_PID" > /tmp/uart_monitor.pid
+
+echo "UART monitor started on $PORT (PID: $MONITOR_PID)"
+echo "Status file: $STATUS_FILE"
+echo ""
+echo "To send test data: echo \"Test123\" > $PORT"
+echo "To check received bytes: cat $STATUS_FILE"
+echo "To stop monitor: kill $(cat /tmp/uart_monitor.pid)"
